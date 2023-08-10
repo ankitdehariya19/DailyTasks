@@ -17,6 +17,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import Image from 'next/image'
+import { FcKindle } from "react-icons/fc";
 
 export default function Home() {
     const [todoInput, setTodoInput] = useState("");
@@ -132,7 +133,8 @@ export default function Home() {
                 <div className="bg-white -m-6 p-3 sticky top-0">
                     <div className="flex justify-center flex-col items-center">
                       
-                        <Image src="/Logo.png" alt="Logo" width={96} height={96} />
+                       
+                        <span className="flex justify-center items-center"><FcKindle className="text-7xl mb-10 w-60 h-auto"/></span>
                         <h1 className="text-5xl md:text-7xl font-bold">
                             Daily Tasks
                         </h1>
