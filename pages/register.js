@@ -3,6 +3,7 @@ import { auth } from "../firebase/firebase";
 import {
     createUserWithEmailAndPassword,
     updateProfile,
+    fetchSignInMethodsForEmail,
     GoogleAuthProvider,
     signInWithPopup,
 } from "firebase/auth";
@@ -20,6 +21,7 @@ const RegisterForm = () => {
     const [password, setPassword] = useState(null);
     const { authUser, isLoading, setAuthUser } = useAuth();
     const [isPasswordValid, setPasswordValid] = useState(true); // Initialize as true
+    const [userExistsError, setUserExistsError] = useState(false);
 
     useEffect(() => {
         if (!isLoading && authUser) {
@@ -29,15 +31,26 @@ const RegisterForm = () => {
 
     const signupHandler = async () => {
         if (!email || !password || !username || !isPasswordValid) return;
+
         try {
+            const userExists = await fetchSignInMethodsForEmail(auth, email);
+
+            if (userExists.length > 0) {
+                // User with the provided email already exists
+                setUserExistsError(true);
+                return;
+            }
+
             const { user } = await createUserWithEmailAndPassword(
                 auth,
                 email,
                 password
             );
+
             await updateProfile(auth.currentUser, {
                 displayName: username,
             });
+
             setAuthUser({
                 uid: user.uid,
                 email: user.email,
@@ -74,7 +87,9 @@ const RegisterForm = () => {
                             Login
                         </Link>
                     </p>
-
+                    {userExistsError && (
+                        <p style={{ color: 'red', marginTop: '0.5rem' }}>An account with this email already exists</p>
+                    )}
                     <form onSubmit={(e) => e.preventDefault()}>
                         <div className="mt-10 pl-1 flex flex-col">
                             <label>Name</label>

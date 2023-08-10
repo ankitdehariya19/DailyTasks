@@ -7,29 +7,30 @@ import { useRouter } from "next/router";
 import Loader from "@/components/Loader";
 import Link from "next/link";
 
-
 const provider = new GoogleAuthProvider();
 
 const LoginForm = () => {
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
-    const {authUser,isLoading} = useAuth();
+    const [errorMessage, setErrorMessage] = useState(null); // State to store error message
+    const { authUser, isLoading } = useAuth();
 
+    const router = useRouter();
 
-    const router = useRouter()
-
-    useEffect (()=> {
-          if(!isLoading && authUser ) {
-               router.push("/");
-          }
-    },[authUser,isLoading])
+    useEffect(() => {
+        if (!isLoading && authUser) {
+            router.push("/");
+        }
+    }, [authUser, isLoading]);
 
     const loginHandler = async () => {
         if (!email || !password) return;
         try {
-            const user = await signInWithEmailAndPassword(auth, email, password);
+            setErrorMessage(null); // Clear any previous error message
+            await signInWithEmailAndPassword(auth, email, password);
         } catch (error) {
             console.error("An error occurred:", error);
+            setErrorMessage("Invalid email or password. Please try again."); // Set error message
         }
     };
 
@@ -47,15 +48,18 @@ const LoginForm = () => {
     };
 
     return isLoading || (!isLoading && authUser) ? (
-        <Loader/>
-        ) : (
+        <Loader />
+    ) : (
         <main className="flex lg:h-[100vh]">
             <div className="w-full lg:w-[60%] p-8 md:p-14 flex items-center justify-center lg:justify-start">
                 <div className="p-8 w-[600px]">
                     <h1 className="text-6xl font-semibold">Login</h1>
                     <p className="mt-6 ml-1">
                         Don't have an account ?{" "}
-                        <Link href="/register" className="underline hover:text-blue-400 cursor-pointer">
+                        <Link
+                            href="/register"
+                            className="underline hover:text-blue-400 cursor-pointer"
+                        >
                             Sign Up
                         </Link>
                     </p>
@@ -86,7 +90,11 @@ const LoginForm = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-                        <button onClick={loginHandler} className="bg-black text-white w-44 py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90">
+                        <div className="mt-6 text-red-600">{errorMessage}</div>
+                        <button
+                            onClick={loginHandler}
+                            className="bg-black text-white w-44 py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90"
+                        >
                             Sign in
                         </button>
                     </form>
